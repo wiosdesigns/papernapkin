@@ -2,26 +2,101 @@
 <html>
 <head>
   <title>Paper Napkin</title>
-  <link rel="stylesheet" href="/css/simplemde-theme-nord.min.css">
-  <script src="/js/simplemde.min.js"></script>
   <style>
+    :root {
+      --s1: clamp(4px, 0.36vw, 8px);
+    }  
+    
+    @font-face {
+      font-family: main;
+      src: url(/fira-code-regular.ttf);
+    }
+    * {box-sizing: border-box; font-family: main;}
+    
     body{
-      background: #2e3440;
-      color: #eceff4;
-      font-family: Montserrat, sans-serif;
+      background: #0f0d0b;
+      color: #dabb95;
+      font-family: main, sans-serif;
+      text-align: center;
+    }
+    
+    main {
+      text-align: left;
+      display: inline-grid;
+      width: 100%;
+      max-width: 840px;
+      padding: calc(16 * var(--s1)) calc(4 * var(--s1));
+    }
+    
+    main>* {
+      grid-area: 1 / 1 / 2 / 2;
+    }
+    
+    section{
+      width: 100%;
+      line-height: 200%;
+      font-size: calc(6 * var(--s1));
+      background: none;
+      border: none;
+      color: #dabb95;
+      outline: none;
+      margin: none;
+    }
+    
+    section.display {
+      pointer-events: none;
+    }
+    
+    section.textarea {
+      
+    }
+    
+    section:focus{
+      border: none;
+      outline: none;
+    }
+    
+    a {
+      color: #fec85d;
+      text-decoration: none;
+      pointer-events: initial;
     }
   </style>
-</head>
-<body onhashchange="location.reload()">
-  <div>
-    <textarea></textarea>
-  </div>  
+  
   <script>
-    var simplemde = new SimpleMDE({
-      autosave: {enabled: true, delay: 1000, uniqueId: `pn-${location.hash}`},
-      spellChecker: false,
-      toolbar: false
-    });
+    $ = (e) => document.querySelector(e);
+    
+    function contentChanged() {
+      const textarea = $("section.textarea");
+      const section = $("section.display");
+      let str = textarea.innerText;
+      saveContent();
+      str = str.replace(/(#[0-9a-zA-Z]*)(\s|\n)/g, '<a href="$1">$1</a>$2');
+      str = str.replace(/(#[0-9a-zA-Z]*)$/g, '<a href="$1" contenteditable="false">$1</a>');
+      str = str.replace(/\n/g, "<br>");
+      section.innerHTML = str;
+    }
+    
+    function saveContent() {
+      const textarea = $("section.textarea");
+      const str = textarea.innerText;
+      const key = `pn2-${location.hash.toLowerCase()}`;
+      localStorage.setItem(key, str);
+    }
+    
+    function loadContent() {
+      const textarea = $("section.textarea");
+      const key = `pn2-${location.hash.toLowerCase()}`;
+      const str = localStorage.getItem(key) || "";
+      textarea.innerText = str;
+      contentChanged();
+    }
   </script>
+</head>
+<body onhashchange="loadContent()" onload="loadContent()">
+  <main>
+    <section class="textarea" oninput="contentChanged()" contenteditable="true" spellcheck="false">Hello #world</section>
+    <section class="display"></section>
+  </main>  
 </body>
 </html>
